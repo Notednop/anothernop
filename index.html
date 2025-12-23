@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ApSoftware | Premium Android Tuning</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --mikasa-red: #8b0000;
+            --mikasa-dark: #0a0a0a;
+            --mikasa-gray: #1a1a1a;
+            --accent: #ff4d4d;
+        }
+
+        body {
+            background-color: var(--mikasa-dark);
+            color: #e0e0e0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        .mikasa-gradient {
+            background: linear-gradient(135deg, #2c0000 0%, #0a0a0a 100%);
+        }
+
+        .terminal-window {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 20px 50px rgba(139, 0, 0, 0.2);
+        }
+
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(255, 77, 77, 0.1);
+            position: absolute;
+            animation: scan 4s linear infinite;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        .glass {
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-mikasa {
+            background: var(--mikasa-red);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-mikasa:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(255, 77, 77, 0.4);
+        }
+
+        .hero-img {
+            mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+            filter: grayscale(0.3) contrast(1.1);
+        }
+        
+        .typewriter-text::after {
+            content: "|";
+            animation: blink 0.8s infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Nav.comation -->
+    <nav class="fixed w-full z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center glass rounded-2xl px-8 py-4">
+            <div class="flex items-center space-gap-2">
+                <span class="text-2xl font-extrabold tracking-tighter text-white">Ap<span class="text-red-600">Software</span></span>
+            </div>
+            <div class="hidden md:flex space-x-8 font-medium text-sm uppercase tracking-widest text-gray-400">
+                <a href="#services" class="hover:text-red-500 transition">Layanan</a>
+                <a href="#terminal" class="hover:text-red-500 transition">Tweak</a>
+                <a href="#about" class="hover:text-red-500 transition">Tentang</a>
+                <a href="#contact" class="hover:text-red-500 transition">Kontak</a>
+            </div>
+            <a href="https://wa.me/+6287839022806" class="btn-mikasa text-white px-6 py-2 rounded-lg font-bold text-sm">ORDER NOW</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center pt-20 overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <!-- Background Decoration -->
+            <div class="absolute top-20 right-0 w-1/2 h-full opacity-20 pointer-events-none">
+                 <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#8b0000" d="M44.7,-76.4C58.3,-69.2,70,-57.9,78.7,-44.5C87.4,-31.1,93.1,-15.5,91.8,-0.7C90.5,14,82.3,28.1,72.6,40.4C62.9,52.7,51.8,63.2,38.8,70.8C25.8,78.3,10.9,82.9,-3.3,88.7C-17.6,94.5,-35.1,101.5,-49.4,96.4C-63.7,91.2,-74.7,73.9,-81.9,57.1C-89,40.4,-92.4,24.2,-91.1,8.5C-89.8,-7.2,-83.8,-22.4,-75.4,-36.5C-67,-50.5,-56.3,-63.5,-43.1,-70.9C-29.8,-78.3,-14.9,-80.1,0.5,-81C15.9,-81.9,31.2,-83.6,44.7,-76.4Z" transform="translate(100 100)" />
+                </svg>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center relative z-10">
+            <div>
+                <h2 class="text-red-600 font-bold tracking-[0.3em] mb-4 mono text-sm">SYSTEM OVERRIDE v2.0</h2>
+                <h1 class="text-6xl md:text-8xl font-extrabold text-white leading-none mb-6">
+                    MURNIKAN <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-900">ANDROID-MU.</span>
+                </h1>
+                <p class="text-gray-400 text-lg mb-8 max-w-md leading-relaxed">
+                    Optimasi performa tingkat kernel, debloat aplikasi sistem, dan bypass batasan manufaktur dengan sentuhan presisi ApSoftware.
+                </p>
+                <div class="flex space-x-4">
+                    <button class="btn-mikasa text-white px-8 py-4 rounded-xl font-bold flex items-center gap-3">
+                        MULAI OPREK
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </button>
+                    <button class="border border-gray-700 hover:border-red-600 transition text-white px-8 py-4 rounded-xl font-bold">
+                        LIHAT MODUL
+                    </button>
+                </div>
+            </div>
+
+            <!-- Terminal Tweak Animation -->
+            <div id="terminal" class="terminal-window relative overflow-hidden h-[400px] flex flex-col">
+                <div class="scanline"></div>
+                <div class="bg-[#1a1a1a] px-4 py-2 flex items-center gap-2 border-bottom border-[#333]">
+                    <div class="w-3 h-3 rounded-full bg-red-600"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-600"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-600"></div>
+                    <span class="ml-4 text-xs font-bold text-gray-500 mono uppercase tracking-widest">ApSoftware - Terminal Oprek</span>
+                </div>
+                <div class="p-6 mono text-sm flex-1 overflow-y-auto" id="terminal-content">
+                    <div class="text-green-500 mb-2">Connecting to device: SM-G991B via ADB...</div>
+                    <div class="text-white" id="terminal-output"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Grid -->
+    <section id="services" class="py-24 bg-[#050505]">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h3 class="text-red-600 font-bold mono tracking-widest mb-2 uppercase">Layanan Kami</h3>
+                <h2 class="text-4xl font-extrabold text-white">Weaponry System</h2>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Service 1 -->
+                <div class="glass p-8 rounded-3xl group hover:border-red-600 transition-all duration-500">
+                    <div class="w-14 h-14 bg-red-900/20 rounded-2xl flex items-center justify-center mb-6 text-red-600 group-hover:scale-110 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.77.04"/></svg>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-3">Rooting & Magisk</h4>
+                    <p class="text-gray-500 text-sm leading-relaxed">Akses penuh ke sistem Android Anda. Instalasi Magisk, LSPosed, dan modul kustom tanpa batas.</p>
+                </div>
+
+                <!-- Service 2 -->
+                <div class="glass p-8 rounded-3xl group hover:border-red-600 transition-all duration-500">
+                    <div class="w-14 h-14 bg-red-900/20 rounded-2xl flex items-center justify-center mb-6 text-red-600 group-hover:scale-110 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2h16c1.1 0 2 .9 2 2v3c0 1.1-.9 2-2 2"/><path d="M13 16a3 3 0 0 1-3 3H4a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h6"/><path d="M15 8h.01"/><path d="M18 8h.01"/><path d="m14 22 3-3 3 3"/></svg>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-3">Gaming Tweak</h4>
+                    <p class="text-gray-500 text-sm leading-relaxed">Unlock 90/120 FPS, optimasi thermal throttling, dan GPU overclocking untuk performa maksimal.</p>
+                </div>
+
+                <!-- Service 3 -->
+                <div class="glass p-8 rounded-3xl group hover:border-red-600 transition-all duration-500">
+                    <div class="w-14 h-14 bg-red-900/20 rounded-2xl flex items-center justify-center mb-6 text-red-600 group-hover:scale-110 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-3">Custom ROM</h4>
+                    <p class="text-gray-500 text-sm leading-relaxed">Pindah dari UI berat ke Custom ROM seperti LineageOS atau Pixel Experience untuk kelancaran tiada tanding.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Character Quote Section -->
+    <section class="py-24 relative overflow-hidden mikasa-gradient">
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+            <div class="order-2 md:order-1 relative">
+                <!-- Mikasa SVG Placeholder Style -->
+                <div class="w-full h-[500px] flex items-center justify-center">
+                    <div class="relative w-80 h-80">
+                        <!-- Stylized Scarf Circle -->
+                        <div class="absolute inset-0 border-8 border-red-600 rounded-full animate-pulse opacity-20"></div>
+                        <div class="absolute inset-4 border-4 border-red-800 rounded-full"></div>
+                        <!-- Stylized "M" Logo -->
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="text-9xl font-black text-white/10 select-none">M</span>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-0 text-center">
+                         <p class="mono text-red-600 font-bold">MIKASA ACKERMAN EDITION</p>
+                    </div>
+                </div>
+            </div>
+            <div class="order-1 md:order-2">
+                <blockquote class="text-3xl font-light italic text-white mb-8 border-l-4 border-red-600 pl-8">
+                    "This world is cruel, and it's also very beautiful. Just like your Android—let's cut through the bloat and find its true power."
+                </blockquote>
+                <p class="text-gray-400 mb-8 leading-relaxed">
+                    Di ApSoftware, kami percaya setiap perangkat memiliki potensi yang tersembunyi di balik proteksi pabrik. Kami hadir untuk membebaskan potensi tersebut dengan keamanan terjamin.
+                </p>
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-[2px] bg-red-600"></div>
+                    <span class="text-white font-bold tracking-widest uppercase">Ackerman Engineering</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact" class="bg-black py-20 border-t border-gray-900">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-4 gap-12 mb-16">
+                <div class="col-span-2">
+                    <h4 class="text-2xl font-bold text-white mb-6">Ap<span class="text-red-600">Software</span></h4>
+                    <p class="text-gray-500 max-w-sm mb-6">Penyedia jasa optimasi dan modifikasi sistem Android terpercaya dengan standar keamanan tinggi.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-500 hover:text-red-600"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg></a>
+                        <a href="#" class="text-gray-500 hover:text-red-600"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+                        <a href="#" class="text-gray-500 hover:text-red-600"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg></a>
+                    </div>
+                </div>
+                <div>
+                    <h5 class="text-white font-bold mb-6">Navigasi</h5>
+                    <ul class="space-y-4 text-gray-500 text-sm">
+                        <li><a href="#" class="hover:text-red-500 transition">Beranda</a></li>
+                        <li><a href="#" class="hover:text-red-500 transition">Harga Layanan</a></li>
+                        <li><a href="#" class="hover:text-red-500 transition">Testimoni</a></li>
+                        <li><a href="#" class="hover:text-red-500 transition">FAQ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="text-white font-bold mb-6">Metode Bayar</h5>
+                    <div class="grid grid-cols-3 gap-2 opacity-50">
+                        <div class="h-8 bg-gray-800 rounded"></div>
+                        <div class="h-8 bg-gray-800 rounded"></div>
+                        <div class="h-8 bg-gray-800 rounded"></div>
+                        <div class="h-8 bg-gray-800 rounded"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center text-gray-700 text-xs border-t border-gray-900 pt-8">
+                &copy; 2025 ApSoftware x Ackerman Eng. All Rights Reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Terminal Animation Script
+        const terminalOutput = document.getElementById('terminal-output');
+        const commands = [
+            { text: "> sudo su", color: "text-white" },
+            { text: "[SYSTEM] root access granted.", color: "text-red-500" },
+            { text: "> adb shell getprop ro.product.model", color: "text-white" },
+            { text: "Device: ApSoftware Detected", color: "text-yellow-500" },
+            { text: "> sh /sdcard/apsoftware_tweak.sh", color: "text-white" },
+            { text: "[INIT] Starting ApSoftware Core Optimizer...", color: "text-blue-400" },
+            { text: "[BUSY] Cleaning dalvik-cache...", color: "text-gray-500" },
+            { text: "[OK] Success.", color: "text-green-500" },
+            { text: "[BUSY] Overriding CPU Governor to 'Performance'...", color: "text-gray-500" },
+            { text: "[OK] Core 0-7 modified.", color: "text-green-500" },
+            { text: "[BUSY] Injecting thermal_config.xml...", color: "text-gray-500" },
+            { text: "[OK] FPS Lock removed.", color: "text-green-500" },
+            { text: "[SYSTEM] Tweak applied successfully. Rebooting...", color: "text-red-500" },
+            { text: "----------------------------------------", color: "text-gray-600" },
+            { text: "ANDROID OPTIMIZED BY APSOFTWARE", color: "text-white font-bold" }
+        ];
+
+        let commandIndex = 0;
+
+        function typeCommand() {
+            if (commandIndex < commands.length) {
+                const cmd = commands[commandIndex];
+                const div = document.createElement('div');
+                div.className = `mb-1 ${cmd.color}`;
+                terminalOutput.appendChild(div);
+                
+                let charIndex = 0;
+                const interval = setInterval(() => {
+                    div.textContent += cmd.text[charIndex];
+                    charIndex++;
+                    if (charIndex === cmd.text.length) {
+                        clearInterval(interval);
+                        commandIndex++;
+                        setTimeout(typeCommand, 600);
+                        
+                        // Scroll to bottom
+                        const container = document.getElementById('terminal-content');
+                        container.scrollTop = container.scrollHeight;
+                    }
+                }, 30);
+            } else {
+                // Reset after delay
+                setTimeout(() => {
+                    terminalOutput.innerHTML = "";
+                    commandIndex = 0;
+                    typeCommand();
+                }, 5000);
+            }
+        }
+
+        window.onload = () => {
+            typeCommand();
+        };
+
+        // Smooth Scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
