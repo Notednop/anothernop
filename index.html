@@ -1,148 +1,518 @@
 <!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MIKASAHUNTER - NetHunter Kernel Project</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <!-- Font Awesome Icons -->
+    <!-- Google Fonts & Font Awesome (Opsional, tapi kami sediakan fallback huruf jika offline) -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- AOS (Animate on Scroll) CSS -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'sans-serif'],
-                        mono: ['Fira Code', 'monospace'],
-                    },
-                    colors: {
-                        brand: {
-                            dark: '#0a0f1d',
-                            card: '#111827',
-                            primary: '#00ff66', /* Neon Green */
-                            secondary: '#00e5ff', /* Cyan */
-                            accent: '#ff007f' /* Pink */
-                        }
-                    }
-                }
+    <style>
+        /* --- RESET & BASE STYLE --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            background-color: #0a0f1d;
+            color: #e5e7eb;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        code, .monospace {
+            font-family: 'Fira Code', 'Courier New', Courier, monospace;
+        }
+
+        /* --- COLORS & GLOWS --- */
+        :root {
+            --primary: #00ff66; /* Neon Green */
+            --secondary: #00e5ff; /* Cyan */
+            --dark-card: #111827;
+            --border-color: #1f2937;
+        }
+        .text-primary { color: var(--primary); }
+        .text-secondary { color: var(--secondary); }
+        .neon-text {
+            text-shadow: 0 0 10px rgba(0, 255, 102, 0.4);
+        }
+
+        /* --- CONTAINER --- */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* --- NAVBAR --- */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background-color: rgba(10, 15, 29, 0.9);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+        }
+        .nav-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        .logo {
+            font-family: 'Fira Code', monospace;
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+        .nav-links a {
+            color: #9ca3af;
+            text-decoration: none;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        .btn-github {
+            background-color: #1f2937;
+            padding: 8px 16px;
+            border-radius: 8px;
+            color: #fff !important;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn-github:hover {
+            background-color: var(--primary);
+            color: #0a0f1d !important;
+        }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            min-height: 100vh;
+            padding-top: 100px;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        .grid-bg {
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(to right, #1f2937 1px, transparent 1px), linear-gradient(to bottom, #1f2937 1px, transparent 1px);
+            background-size: 4rem 4rem;
+            mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 100%);
+            -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 100%);
+            opacity: 0.15;
+            z-index: 1;
+        }
+        .hero-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 40px;
+            position: relative;
+            z-index: 10;
+            width: 100%;
+        }
+        @media (min-width: 992px) {
+            .hero-container {
+                grid-template-columns: 1.2fr 0.8fr;
             }
         }
-    </script>
-    <style>
-        /* Custom Custom Glow Effects */
-        .neon-glow {
-            text-shadow: 0 0 10px rgba(0, 255, 102, 0.5), 0 0 20px rgba(0, 255, 102, 0.3);
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            border-radius: 30px;
+            background-color: rgba(0, 255, 102, 0.1);
+            border: 1px solid rgba(0, 255, 102, 0.2);
+            color: var(--primary);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.75rem;
+            margin-bottom: 20px;
         }
-        .border-glow:hover {
-            box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
-            border-color: rgba(0, 255, 102, 0.5);
-        }
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
+        .badge-dot {
             width: 8px;
+            height: 8px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
         }
-        ::-webkit-scrollbar-track {
-            background: #0a0f1d;
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.5; }
         }
-        ::-webkit-scrollbar-thumb {
-            background: #1f2937;
-            border-radius: 4px;
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            color: #fff;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #00ff66;
+        @media (min-width: 576px) {
+            .hero-title { font-size: 3.5rem; }
+        }
+        .hero-desc {
+            color: #9ca3af;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            max-width: 550px;
+        }
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .btn-main {
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 800;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-primary-style {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #0a0f1d;
+            box-shadow: 0 4px 15px rgba(0, 255, 102, 0.2);
+        }
+        .btn-primary-style:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 102, 0.3);
+        }
+        .btn-outline-style {
+            background-color: #111827;
+            border: 1px solid #1f2937;
+            color: #fff;
+        }
+        .btn-outline-style:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* --- TERMINAL MOCKUP --- */
+        .terminal {
+            background-color: rgba(0, 0, 0, 0.85);
+            border: 1px solid #1f2937;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+        .terminal-header {
+            background-color: #0d1117;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #1f2937;
+        }
+        .terminal-dots {
+            display: flex;
+            gap: 6px;
+        }
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .dot-red { background-color: #ef4444; }
+        .dot-yellow { background-color: #f59e0b; }
+        .dot-green { background-color: #10b981; }
+        .terminal-title {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.75rem;
+            color: #4b5563;
+        }
+        .terminal-body {
+            padding: 24px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: #d1d5db;
+        }
+        .terminal-row {
+            margin-bottom: 12px;
+        }
+        .terminal-gray { color: #6b7280; }
+        .terminal-feature-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            padding-left: 15px;
+            margin: 15px 0;
+        }
+        @media (min-width: 480px) {
+            .terminal-feature-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        /* --- FEATURES SECTION --- */
+        .features {
+            padding: 100px 0;
+            background-color: #080c16;
+            border-top: 1px solid #111827;
+            border-bottom: 1px solid #111827;
+        }
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .section-header h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 15px;
+        }
+        .section-header p {
+            color: #9ca3af;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+        @media (min-width: 768px) {
+            .features-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        .feature-card {
+            background-color: var(--dark-card);
+            border: 1px solid #1f2937;
+            padding: 40px 30px;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 255, 102, 0.4);
+            box-shadow: 0 10px 25px rgba(0, 255, 102, 0.05);
+        }
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+        }
+        .icon-green { background-color: rgba(0, 255, 102, 0.1); color: var(--primary); }
+        .icon-cyan { background-color: rgba(0, 229, 255, 0.1); color: var(--secondary); }
+        .icon-pink { background-color: rgba(255, 0, 127, 0.1); color: #ff007f; }
+        .feature-card h3 {
+            font-size: 1.25rem;
+            color: #fff;
+            margin-bottom: 15px;
+        }
+        .feature-card p {
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+
+        /* --- DOWNLOAD SECTION --- */
+        .download {
+            padding: 100px 0;
+        }
+        .table-container {
+            background-color: var(--dark-card);
+            border: 1px solid #1f2937;
+            border-radius: 16px;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            min-width: 600px;
+        }
+        th {
+            background-color: #0d1117;
+            padding: 20px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            border-bottom: 1px solid #1f2937;
+        }
+        td {
+            padding: 20px;
+            border-bottom: 1px solid rgba(31, 41, 55, 0.5);
+            color: #9ca3af;
+        }
+        tr:hover td {
+            background-color: rgba(31, 41, 55, 0.2);
+        }
+        .device-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .device-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background-color: rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .device-name {
+            font-weight: 700;
+            color: #fff;
+        }
+        .device-sub {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        .status-badge {
+            background-color: rgba(0, 255, 102, 0.1);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .btn-download {
+            background-color: var(--primary);
+            color: #0a0f1d;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-download:hover {
+            opacity: 0.9;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            padding: 50px 0;
+            border-top: 1px solid #111827;
+            background-color: #0a0f1d;
+        }
+        .footer-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        @media (min-width: 768px) {
+            .footer-wrapper { flex-direction: row; }
+        }
+        .footer-copy {
+            font-size: 0.8rem;
+            color: #4b5563;
+            font-family: 'Fira Code', monospace;
         }
     </style>
 </head>
-<body class="bg-brand-dark text-gray-100 font-sans selection:bg-brand-primary selection:text-brand-dark overflow-x-hidden">
+<body>
 
     <!-- Header / Navbar -->
-    <header class="fixed top-0 left-0 w-full z-50 bg-brand-dark/80 backdrop-blur-md border-b border-gray-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <span class="text-brand-primary text-2xl"><i class="fa-solid fa-terminal animate-pulse"></i></span>
-                <span class="font-mono font-bold text-xl tracking-wider text-white">MIKASA<span class="text-brand-primary">HUNTER</span></span>
-            </div>
-            <nav class="hidden md:flex items-center gap-8 font-mono text-sm">
-                <a href="#features" class="text-gray-400 hover:text-brand-primary transition-colors duration-300">Features</a>
-                <a href="#download" class="text-gray-400 hover:text-brand-primary transition-colors duration-300">Downloads</a>
-                <a href="#install" class="text-gray-400 hover:text-brand-primary transition-colors duration-300">Installation</a>
-                <a href="https://github.com" target="_blank" class="px-4 py-2 bg-gray-800 hover:bg-brand-primary hover:text-brand-dark font-bold rounded-lg transition-all duration-300 flex items-center gap-2">
-                    <i class="fa-brands fa-github"></i> GitHub
+    <header>
+        <div class="container">
+            <div class="nav-wrapper">
+                <a href="#" class="logo">
+                    <i class="fa-solid fa-terminal" style="color: var(--primary);"></i>
+                    <span>MIKASA<span class="text-primary">HUNTER</span></span>
                 </a>
-            </nav>
+                <nav class="nav-links">
+                    <a href="#features">Features</a>
+                    <a href="#download">Downloads</a>
+                    <a href="https://github.com" target="_blank" class="btn-github">
+                        <i class="fa-brands fa-github"></i> GitHub
+                    </a>
+                </nav>
+            </div>
         </div>
     </header>
 
     <!-- Hero Section -->
-    <section class="min-h-screen pt-24 flex items-center relative overflow-hidden">
-        <!-- Background Grid & Decorative Lights -->
-        <div class="absolute inset-0 bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-20"></div>
-        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-primary/10 rounded-full blur-3xl"></div>
-        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-brand-secondary/10 rounded-full blur-3xl"></div>
-
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center py-12">
-            <!-- Left Side: Copy -->
-            <div data-aos="fade-right" data-aos-duration="1000">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-brand-primary/30 bg-brand-primary/10 text-brand-primary text-xs font-mono mb-6">
-                    <span class="flex h-2 w-2 relative">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-primary opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-primary"></span>
-                    </span>
-                    STABLE RELEASE V2.0
-                </div>
-                <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white mb-6">
-                    Power Up Your <br>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary neon-glow">Kali NetHunter</span>
-                </h1>
-                <p class="text-gray-400 text-lg mb-8 max-w-lg leading-relaxed">
-                    MIKASAHUNTER adalah kernel kustom berspesialisasi tinggi untuk penetration testing langsung dari smartphone Anda. Dibuat dengan optimalisasi performa maksimal dan dukungan penuh driver eksternal.
-                </p>
-                <div class="flex flex-wrap gap-4">
-                    <a href="#download" class="px-8 py-4 bg-gradient-to-r from-brand-primary to-brand-secondary text-brand-dark font-extrabold rounded-xl hover:opacity-90 transform hover:-translate-y-1 transition-all duration-300 shadow-lg shadow-brand-primary/20">
-                        <i class="fa-solid fa-download mr-2"></i> Get Kernel
-                    </a>
-                    <a href="#install" class="px-8 py-4 bg-gray-900 border border-gray-800 hover:border-brand-primary/50 text-white font-bold rounded-xl transition-all duration-300 flex items-center gap-2">
-                        <i class="fa-solid fa-book text-gray-500"></i> Setup Guide
-                    </a>
-                </div>
-            </div>
-
-            <!-- Right Side: Terminal Mockup -->
-            <div data-aos="fade-left" data-aos-duration="1000" class="w-full">
-                <div class="bg-black/80 border border-gray-800 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-md">
-                    <!-- Terminal Header -->
-                    <div class="bg-gray-950 px-4 py-3 flex items-center justify-between border-b border-gray-800">
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full bg-red-500"></span>
-                            <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
-                            <span class="w-3 h-3 rounded-full bg-green-500"></span>
-                        </div>
-                        <span class="text-xs text-gray-500 font-mono">root@mikasahunter:~</span>
-                        <div></div>
+    <section class="hero">
+        <div class="grid-bg"></div>
+        <div class="container" style="position: relative; z-index: 5;">
+            <div class="hero-container">
+                <!-- Sisi Kiri -->
+                <div>
+                    <div class="badge">
+                        <span class="badge-dot"></span>
+                        STABLE RELEASE V2.0
                     </div>
-                    <!-- Terminal Body -->
-                    <div class="p-6 font-mono text-sm text-gray-300 space-y-3 min-h-[300px]">
-                        <p class="text-gray-500"># Initializing MikasaHunter Kernel Loader...</p>
-                        <p><span class="text-brand-primary">$</span> uname -r</p>
-                        <p class="text-brand-secondary">Linux mikasahunter-kernel 5.10.x-NetHunter+</p>
-                        <p><span class="text-brand-primary">$</span> check_features --all</p>
-                        <div class="grid grid-cols-2 gap-2 text-xs text-gray-400 pl-4 py-2">
-                            <div>[ <span class="text-brand-primary">OK</span> ] Wi-Fi Injection (802.11)</div>
-                            <div>[ <span class="text-brand-primary">OK</span> ] OTG Y-Cable Support</div>
-                            <div>[ <span class="text-brand-primary">OK</span> ] RTL88xxAU Drivers</div>
-                            <div>[ <span class="text-brand-primary">OK</span> ] Wireguard Support</div>
-                            <div>[ <span class="text-brand-primary">OK</span> ] HID Gadget Keyboard</div>
-                            <div>[ <span class="text-brand-primary">OK</span> ] CD-ROM Emulation</div>
+                    <h1 class="hero-title">
+                        Power Up Your <br>
+                        <span class="text-primary neon-text">Kali NetHunter</span>
+                    </h1>
+                    <p class="hero-desc">
+                        MIKASAHUNTER adalah kernel kustom berspesialisasi tinggi untuk penetration testing langsung dari smartphone Anda. Dibuat dengan optimalisasi performa maksimal dan dukungan penuh driver eksternal.
+                    </p>
+                    <div class="btn-group">
+                        <a href="#download" class="btn-main btn-primary-style">
+                            <i class="fa-solid fa-download"></i> Get Kernel
+                        </a>
+                        <a href="https://github.com" target="_blank" class="btn-main btn-outline-style">
+                            <i class="fa-solid fa-book"></i> Source Code
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Sisi Kanan (Terminal Mockup) -->
+                <div>
+                    <div class="terminal">
+                        <div class="terminal-header">
+                            <div class="terminal-dots">
+                                <span class="dot dot-red"></span>
+                                <span class="dot dot-yellow"></span>
+                                <span class="dot dot-green"></span>
+                            </div>
+                            <span class="terminal-title">root@mikasahunter:~</span>
+                            <div></div>
                         </div>
-                        <p class="animate-pulse"><span class="text-brand-primary">$</span> <span class="bg-gray-700 text-transparent">_</span></p>
+                        <div class="terminal-body">
+                            <p class="terminal-gray"># Initializing MikasaHunter Kernel Loader...</p>
+                            <p style="margin-top: 10px;"><span class="text-primary">$</span> uname -r</p>
+                            <p class="text-secondary">Linux mikasahunter-kernel 5.10.x-NetHunter+</p>
+                            <p style="margin-top: 10px;"><span class="text-primary">$</span> check_features --all</p>
+                            
+                            <div class="terminal-feature-grid">
+                                <div>[ <span class="text-primary">OK</span> ] Wi-Fi Injection</div>
+                                <div>[ <span class="text-primary">OK</span> ] OTG Y-Cable Support</div>
+                                <div>[ <span class="text-primary">OK</span> ] RTL88xxAU Drivers</div>
+                                <div>[ <span class="text-primary">OK</span> ] Wireguard Support</div>
+                                <div>[ <span class="text-primary">OK</span> ] HID Gadget KB</div>
+                                <div>[ <span class="text-primary">OK</span> ] CD-ROM Emulation</div>
+                            </div>
+                            <p style="margin-top: 10px;"><span class="text-primary">$</span> <span style="background-color: #4b5563; color: transparent;">_</span></p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -150,154 +520,56 @@
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="py-24 bg-gray-950/50 relative border-y border-gray-900">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-16" data-aos="fade-up">
-                <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">Fitur Spesialis MIKASAHUNTER</h2>
-                <p class="text-gray-400">Dirancang khusus untuk menghadirkan fungsionalitas pentesting tingkat lanjut pada perangkat mobile Anda tanpa mengorbankan stabilitas.</p>
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Fitur Spesialis MIKASAHUNTER</h2>
+                <p>Dirancang khusus untuk menghadirkan fungsionalitas pentesting tingkat lanjut pada perangkat mobile Anda tanpa mengorbankan stabilitas.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="features-grid">
                 <!-- Card 1 -->
-                <div data-aos="zoom-in" data-aos-delay="100" class="bg-brand-card border border-gray-800 p-8 rounded-2xl border-glow transition-all duration-300 group">
-                    <div class="w-12 h-12 rounded-xl bg-brand-primary/10 text-brand-primary flex items-center justify-center text-xl mb-6 group-hover:scale-110 transition-transform duration-300">
+                <div class="feature-card">
+                    <div class="feature-icon icon-green">
                         <i class="fa-solid fa-wifi"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-white mb-3">Monitor Mode & Injection</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">Dukungan penuh untuk dongle Wi-Fi eksternal (Atheros, Ralink, Realtek) langsung colok via OTG dengan kemampuan packet injection.</p>
+                    <h3>Monitor Mode & Injection</h3>
+                    <p>Dukungan penuh untuk dongle Wi-Fi eksternal (Atheros, Ralink, Realtek) langsung colok via OTG dengan kemampuan packet injection.</p>
                 </div>
                 <!-- Card 2 -->
-                <div data-aos="zoom-in" data-aos-delay="200" class="bg-brand-card border border-gray-800 p-8 rounded-2xl border-glow transition-all duration-300 group">
-                    <div class="w-12 h-12 rounded-xl bg-brand-secondary/10 text-brand-secondary flex items-center justify-center text-xl mb-6 group-hover:scale-110 transition-transform duration-300">
+                <div class="feature-card">
+                    <div class="feature-icon icon-cyan">
                         <i class="fa-solid fa-keyboard"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-white mb-3">BadUSB / HID Attack</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">Ubah smartphone Anda menjadi keyboard/mouse virtual otomatis untuk melancarkan serangan HID injection (Rubber Ducky style).</p>
+                    <h3>BadUSB / HID Attack</h3>
+                    <p>Ubah smartphone Anda menjadi keyboard/mouse virtual otomatis untuk melancarkan serangan HID injection (Rubber Ducky style).</p>
                 </div>
                 <!-- Card 3 -->
-                <div data-aos="zoom-in" data-aos-delay="300" class="bg-brand-card border border-gray-800 p-8 rounded-2xl border-glow transition-all duration-300 group">
-                    <div class="w-12 h-12 rounded-xl bg-brand-accent/10 text-brand-accent flex items-center justify-center text-xl mb-6 group-hover:scale-110 transition-transform duration-300">
+                <div class="feature-card">
+                    <div class="feature-icon icon-pink">
                         <i class="fa-solid fa-bolt"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-white mb-3">Overclock & Battery Saver</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">CPU/GPU governor yang telah dikalibrasi untuk performa ekstra tinggi saat dibutuhkan, serta mode hemat daya instan saat idle.</p>
+                    <h3>Overclock & Battery Saver</h3>
+                    <p>CPU/GPU governor yang telah dikalibrasi untuk performa ekstra tinggi saat dibutuhkan, serta mode hemat daya instan saat idle.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Download Section -->
-    <section id="download" class="py-24 relative">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-16" data-aos="fade-up">
-                <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">Download Center</h2>
-                <p class="text-gray-400 font-mono text-sm">Pilih build kernel yang sesuai dengan tipe perangkat Anda.</p>
+    <section id="download" class="download">
+        <div class="container">
+            <div class="section-header">
+                <h2>Download Center</h2>
+                <p class="monospace" style="font-size: 0.85rem;">Pilih build kernel yang sesuai dengan tipe perangkat Anda.</p>
             </div>
 
-            <!-- Table / Download List -->
-            <div data-aos="fade-up" data-aos-duration="800" class="bg-brand-card border border-gray-800 rounded-2xl overflow-hidden shadow-xl">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-gray-900 border-b border-gray-800 font-mono text-xs text-gray-400 tracking-wider">
-                                <th class="p-6">CODENAME / DEVICE</th>
-                                <th class="p-6">CHIPSET</th>
-                                <th class="p-6">KERNEL VERSION</th>
-                                <th class="p-6">STATUS</th>
-                                <th class="p-6 text-right">ACTION</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-800/50 text-sm">
-                            <!-- Device Row 1 -->
-                            <tr class="hover:bg-gray-900/40 transition-colors duration-150">
-                                <td class="p-6 flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-lg bg-brand-primary/10 flex items-center justify-center text-brand-primary">
-                                        <i class="fa-solid fa-mobile-screen-button"></i>
-                                    </div>
-                                    <div>
-                                        <div class="font-bold text-white">mido (Redmi Note 4)</div>
-                                        <div class="text-xs text-gray-500">Android 10 - 11</div>
-                                    </div>
-                                </td>
-                                <td class="p-6 font-mono text-gray-400">Snapdragon 625</td>
-                                <td class="p-6 font-mono text-gray-400">v4.9.x-mikasahunter</td>
-                                <td class="p-6"><span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-brand-primary/10 text-brand-primary">Stable</span></td>
-                                <td class="p-6 text-right">
-                                    <a href="#" class="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary/90 text-brand-dark font-extrabold rounded-lg transition-all duration-300">
-                                        <i class="fa-solid fa-download"></i> Download
-                                    </a>
-                                </td>
-                            </tr>
-                            <!-- Device Row 2 -->
-                            <tr class="hover:bg-gray-900/40 transition-colors duration-150">
-                                <td class="p-6 flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-lg bg-brand-secondary/10 flex items-center justify-center text-brand-secondary">
-                                        <i class="fa-solid fa-mobile-screen-button"></i>
-                                    </div>
-                                    <div>
-                                        <div class="font-bold text-white">alioth (POCO F3)</div>
-                                        <div class="text-xs text-gray-500">Android 12 - 13</div>
-                                    </div>
-                                </td>
-                                <td class="p-6 font-mono text-gray-400">Snapdragon 870</td>
-                                <td class="p-6 font-mono text-gray-400">v4.19.x-mikasahunter</td>
-                                <td class="p-6"><span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-brand-primary/10 text-brand-primary">Stable</span></td>
-                                <td class="p-6 text-right">
-                                    <a href="#" class="inline-flex items-center gap-2 px-4 py-2 bg-brand-secondary hover:bg-brand-secondary/90 text-brand-dark font-extrabold rounded-lg transition-all duration-300">
-                                        <i class="fa-solid fa-download"></i> Download
-                                    </a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Installation Guide -->
-    <section id="install" class="py-24 bg-gray-950/50 border-t border-gray-900">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6">
-            <div class="text-center mb-16" data-aos="fade-up">
-                <h2 class="text-3xl font-bold text-white mb-4">Petunjuk Instalasi</h2>
-                <p class="text-gray-400">Pastikan Anda telah melakukan backup data sebelum memulai proses flashing.</p>
-            </div>
-
-            <div class="space-y-8" data-aos="fade-up" data-aos-delay="100">
-                <!-- Step 1 -->
-                <div class="flex gap-6">
-                    <div class="flex-shrink-0 w-10 h-10 rounded-full bg-brand-primary text-brand-dark font-mono font-bold flex items-center justify-center">01</div>
-                    <div>
-                        <h4 class="text-lg font-bold text-white mb-2">Masuk ke Custom Recovery</h4>
-                        <p class="text-gray-400 text-sm">Matikan ponsel Anda, lalu masuk ke mode TWRP, OrangeFox, atau PBRP recovery dengan menekan tombol Power + Volume Up.</p>
-                    </div>
-                </div>
-                <!-- Step 2 -->
-                <div class="flex gap-6">
-                    <div class="flex-shrink-0 w-10 h-10 rounded-full bg-brand-primary text-brand-dark font-mono font-bold flex items-center justify-center">02</div>
-                    <div>
-                        <h4 class="text-lg font-bold text-white mb-2">Flash Kernel .zip</h4>
-                        <p class="text-gray-400 text-sm">Cari file zip kernel MIKASAHUNTER yang telah di-download, pilih install/flash file tersebut (menggunakan toolkit AnyKernel3 bawaan).</p>
-                    </div>
-                </div>
-                <!-- Step 3 -->
-                <div class="flex gap-6">
-                    <div class="flex-shrink-0 w-10 h-10 rounded-full bg-brand-primary text-brand-dark font-mono font-bold flex items-center justify-center">03</div>
-                    <div>
-                        <h4 class="text-lg font-bold text-white mb-2">Reboot & Verifikasi</h4>
-                        <p class="text-gray-400 text-sm mb-4">Reboot system. Buka aplikasi NetHunter App atau terminal emulator lalu jalankan perintah berikut untuk memastikan driver aktif:</p>
-                        <div class="bg-black/60 border border-gray-800 p-4 rounded-xl font-mono text-xs text-brand-primary">
-                            $ uname -a <br>
-                            <span class="text-gray-400"># Output harus menunjukkan branding 'mikasahunter'</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="border-t border-gray-900 bg-brand-dark py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div class="flex items-center gap-2">
-                <span class="text-brand-prim
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>CODENAME / DEVICE</th>
+                            <th>CHIPSET</th>
+                            <th>KERNEL VERSION</th>
+                            <th>STATUS</th>
+                            <th style="text-ali
