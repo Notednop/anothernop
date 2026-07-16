@@ -1,1163 +1,303 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="scroll-smooth">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mikasa Kernel — Android Custom Kernel</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Syne:wght@300;400;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #050810;
-    --bg2: #080d1a;
-    --accent: #00d4ff;
-    --accent2: #7c3aed;
-    --accent3: #f472b6;
-    --text: #e2eaf8;
-    --muted: #5a7090;
-    --card: rgba(255,255,255,0.03);
-    --border: rgba(0,212,255,0.15);
-    --glow: 0 0 30px rgba(0,212,255,0.3);
-  }
-
-  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    font-family: 'Syne', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    overflow-x: hidden;
-    cursor: none;
-  }
-
-  /* Custom cursor */
-  .cursor {
-    width: 12px; height: 12px;
-    background: var(--accent);
-    border-radius: 50%;
-    position: fixed;
-    pointer-events: none;
-    z-index: 9999;
-    transform: translate(-50%,-50%);
-    transition: transform 0.1s, background 0.2s;
-    box-shadow: 0 0 15px var(--accent);
-  }
-  .cursor-ring {
-    width: 36px; height: 36px;
-    border: 1.5px solid rgba(0,212,255,0.5);
-    border-radius: 50%;
-    position: fixed;
-    pointer-events: none;
-    z-index: 9998;
-    transform: translate(-50%,-50%);
-    transition: all 0.15s ease;
-  }
-
-  /* Grid background */
-  body::before {
-    content:'';
-    position: fixed;
-    inset:0;
-    background-image:
-      linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
-    background-size: 60px 60px;
-    pointer-events:none;
-    z-index:0;
-  }
-
-  /* Noise overlay */
-  body::after {
-    content:'';
-    position:fixed;
-    inset:0;
-    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events:none;
-    z-index:1;
-    opacity: 0.4;
-  }
-
-  .wrap { position:relative; z-index:2; }
-
-  /* NAV */
-  nav {
-    position: fixed; top:0; left:0; right:0;
-    z-index: 100;
-    padding: 20px 60px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(5,8,16,0.7);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
-    animation: slideDown 0.8s ease forwards;
-  }
-
-  @keyframes slideDown {
-    from { transform: translateY(-100%); opacity:0; }
-    to { transform: translateY(0); opacity:1; }
-  }
-
-  .logo {
-    font-family: 'Orbitron', monospace;
-    font-size: 1.4rem;
-    font-weight: 900;
-    color: var(--accent);
-    letter-spacing: 3px;
-    text-shadow: var(--glow);
-  }
-  .logo span { color: var(--accent3); }
-
-  .nav-links { display:flex; gap:40px; list-style:none; }
-  .nav-links a {
-    color: var(--muted);
-    text-decoration:none;
-    font-size: 0.85rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    transition: color 0.3s;
-  }
-  .nav-links a:hover { color: var(--accent); }
-
-  /* HERO */
-  .hero {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    text-align: center;
-    padding: 120px 40px 80px;
-    position: relative;
-  }
-
-  .hero-glow {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -60%);
-    width: 700px; height: 700px;
-    background: radial-gradient(circle, rgba(0,212,255,0.08) 0%, rgba(124,58,237,0.06) 40%, transparent 70%);
-    pointer-events:none;
-    animation: pulse 4s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%,100% { transform: translate(-50%,-60%) scale(1); opacity:0.7; }
-    50% { transform: translate(-50%,-60%) scale(1.1); opacity:1; }
-  }
-
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(0,212,255,0.08);
-    border: 1px solid rgba(0,212,255,0.25);
-    border-radius: 100px;
-    padding: 6px 18px;
-    font-size: 0.75rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 32px;
-    animation: fadeUp 1s 0.2s both;
-  }
-  .badge::before {
-    content:'';
-    width:6px; height:6px;
-    border-radius:50%;
-    background: var(--accent);
-    box-shadow: 0 0 8px var(--accent);
-    animation: blink 2s infinite;
-  }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-  .hero h1 {
-    font-family: 'Orbitron', monospace;
-    font-size: clamp(3.5rem, 9vw, 8rem);
-    font-weight: 900;
-    line-height: 1;
-    letter-spacing: -2px;
-    animation: fadeUp 1s 0.4s both;
-  }
-
-  .hero h1 .line1 { color: var(--text); }
-  .hero h1 .line2 {
-    background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    display: block;
-  }
-
-  .hero-sub {
-    margin-top: 24px;
-    font-size: 1.1rem;
-    color: var(--muted);
-    max-width: 520px;
-    line-height: 1.7;
-    animation: fadeUp 1s 0.6s both;
-  }
-
-  .hero-ctas {
-    display: flex;
-    gap: 16px;
-    margin-top: 48px;
-    flex-wrap: wrap;
-    justify-content:center;
-    animation: fadeUp 1s 0.8s both;
-  }
-
-  .btn-primary {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 16px 36px;
-    background: var(--accent);
-    color: #000;
-    font-family: 'Orbitron', monospace;
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    border: none;
-    border-radius: 4px;
-    text-decoration: none;
-    cursor: none;
-    transition: all 0.3s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .btn-primary::before {
-    content:'';
-    position:absolute;
-    top:-50%;left:-60%;
-    width:50%;height:200%;
-    background: rgba(255,255,255,0.2);
-    transform: skewX(-20deg);
-    transition: left 0.5s;
-  }
-  .btn-primary:hover::before { left: 130%; }
-  .btn-primary:hover { box-shadow: 0 0 40px rgba(0,212,255,0.5); transform: translateY(-2px); }
-
-  .btn-outline {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 16px 36px;
-    background: transparent;
-    color: var(--text);
-    font-family: 'Orbitron', monospace;
-    font-size: 0.8rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    text-decoration: none;
-    cursor: none;
-    transition: all 0.3s;
-  }
-  .btn-outline:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    box-shadow: 0 0 20px rgba(0,212,255,0.1);
-  }
-
-  .stats {
-    display: flex;
-    gap: 60px;
-    margin-top: 80px;
-    animation: fadeUp 1s 1s both;
-    flex-wrap: wrap;
-    justify-content:center;
-  }
-
-  .stat-item { text-align:center; }
-  .stat-num {
-    font-family: 'Orbitron', monospace;
-    font-size: 2rem;
-    font-weight: 900;
-    color: var(--accent);
-  }
-  .stat-label {
-    font-size: 0.75rem;
-    color: var(--muted);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-top: 4px;
-  }
-
-  @keyframes fadeUp {
-    from { opacity:0; transform: translateY(30px); }
-    to { opacity:1; transform: translateY(0); }
-  }
-
-  /* SECTION */
-  section { padding: 120px 60px; }
-  .section-label {
-    font-size: 0.75rem;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 16px;
-  }
-  .section-title {
-    font-family: 'Orbitron', monospace;
-    font-size: clamp(1.8rem, 4vw, 3rem);
-    font-weight: 700;
-    line-height: 1.2;
-    margin-bottom: 20px;
-  }
-
-  /* FEATURES */
-  .features-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 24px;
-    margin-top: 64px;
-  }
-
-  .feature-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 40px 36px;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.4s;
-    opacity: 0;
-    transform: translateY(40px);
-  }
-
-  .feature-card.visible {
-    animation: fadeUp 0.7s forwards;
-  }
-
-  .feature-card::before {
-    content:'';
-    position:absolute;
-    top:0;left:0;right:0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    opacity:0;
-    transition: opacity 0.3s;
-  }
-  .feature-card:hover::before { opacity:1; }
-  .feature-card:hover {
-    border-color: rgba(0,212,255,0.3);
-    background: rgba(0,212,255,0.04);
-    transform: translateY(-6px);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-  }
-
-  .feature-icon {
-    width: 52px; height: 52px;
-    background: rgba(0,212,255,0.1);
-    border: 1px solid rgba(0,212,255,0.2);
-    border-radius: 12px;
-    display: flex;
-    align-items:center;
-    justify-content:center;
-    font-size: 1.4rem;
-    margin-bottom: 24px;
-  }
-
-  .feature-card h3 {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.95rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    margin-bottom: 12px;
-    color: var(--text);
-  }
-  .feature-card p { font-size: 0.9rem; color: var(--muted); line-height: 1.7; }
-
-  /* DOWNLOAD SECTION */
-  .download-section {
-    max-width: 1000px;
-    margin: 0 auto;
-    text-align:center;
-  }
-
-  .version-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 24px;
-    margin-top: 64px;
-  }
-
-  .version-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 40px 32px;
-    text-align:left;
-    position:relative;
-    overflow:hidden;
-    transition: all 0.4s;
-    cursor:none;
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  .version-card.visible { animation: fadeUp 0.7s forwards; }
-  .version-card.featured {
-    border-color: rgba(0,212,255,0.4);
-    background: rgba(0,212,255,0.03);
-  }
-
-  .version-tag {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 100px;
-    font-size: 0.7rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    font-weight: 600;
-    margin-bottom: 20px;
-  }
-  .tag-stable { background: rgba(0,212,255,0.15); color: var(--accent); }
-  .tag-beta { background: rgba(124,58,237,0.15); color: #a78bfa; }
-  .tag-test { background: rgba(244,114,182,0.15); color: var(--accent3); }
-
-  .version-name {
-    font-family: 'Orbitron', monospace;
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin-bottom: 8px;
-  }
-  .version-date { font-size: 0.8rem; color: var(--muted); margin-bottom: 24px; }
-
-  .version-features { list-style:none; margin-bottom: 32px; }
-  .version-features li {
-    font-size: 0.85rem;
-    color: var(--muted);
-    padding: 6px 0;
-    display:flex;
-    align-items:center;
-    gap:8px;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-  }
-  .version-features li::before { content:'›'; color:var(--accent); font-size:1rem; }
-
-  .dl-btn {
-    display: flex;
-    align-items:center;
-    justify-content:center;
-    gap: 8px;
-    width:100%;
-    padding: 14px 24px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #fff;
-    font-family: 'Orbitron', monospace;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    border: none;
-    border-radius: 8px;
-    cursor:none;
-    text-decoration:none;
-    transition: all 0.3s;
-    position:relative;
-    overflow:hidden;
-  }
-  .dl-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(0,212,255,0.3); }
-  .dl-btn.outline {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text);
-  }
-  .dl-btn.outline:hover { border-color: rgba(0,212,255,0.4); color: var(--accent); }
-
-  .file-size { font-size:0.75rem; color:var(--muted); text-align:center; margin-top:10px; }
-
-  /* SPECS */
-  .specs-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow:hidden;
-    margin-top: 64px;
-  }
-
-  .spec-item {
-    padding: 32px;
-    background: var(--bg2);
-    transition: background 0.3s;
-  }
-  .spec-item:hover { background: rgba(0,212,255,0.03); }
-  .spec-label { font-size:0.75rem; color:var(--muted); letter-spacing:2px; text-transform:uppercase; margin-bottom: 10px; }
-  .spec-val { font-family: 'Orbitron', monospace; font-size:1.1rem; color:var(--text); font-weight:700; }
-
-  /* CHANGELOG */
-  .changelog-list { margin-top:48px; }
-  .changelog-item {
-    display:flex;
-    gap:32px;
-    padding: 32px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    opacity: 0;
-    transform: translateX(-30px);
-    transition: all 0.5s;
-  }
-  .changelog-item.visible {
-    opacity:1;
-    transform: translateX(0);
-  }
-
-  .cl-version {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.85rem;
-    color: var(--accent);
-    min-width: 80px;
-    padding-top: 4px;
-  }
-  .cl-date { font-size:0.75rem; color:var(--muted); margin-top:4px; }
-  .cl-changes { flex:1; }
-  .cl-changes h4 { font-size:1rem; margin-bottom:12px; }
-  .cl-tags { display:flex; gap:8px; flex-wrap:wrap; }
-  .cl-tag {
-    padding: 3px 10px;
-    border-radius:100px;
-    font-size:0.7rem;
-    letter-spacing:1px;
-  }
-  .cl-tag.fix { background: rgba(34,197,94,0.1); color:#4ade80; }
-  .cl-tag.feat { background: rgba(0,212,255,0.1); color:var(--accent); }
-  .cl-tag.perf { background: rgba(124,58,237,0.1); color:#a78bfa; }
-
-  /* FOOTER */
-  footer {
-    padding: 60px;
-    border-top: 1px solid var(--border);
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    flex-wrap:wrap;
-    gap:24px;
-  }
-  .footer-logo { font-family:'Orbitron', monospace; font-size:1.2rem; font-weight:900; color:var(--accent); }
-  footer p { font-size:0.8rem; color:var(--muted); }
-
-  /* Floating particles */
-  .particles { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
-  .particle {
-    position:absolute;
-    width:2px; height:2px;
-    background:var(--accent);
-    border-radius:50%;
-    opacity:0;
-    animation: float linear infinite;
-  }
-  @keyframes float {
-    0% { transform: translateY(100vh) translateX(0); opacity:0; }
-    10% { opacity: 0.6; }
-    90% { opacity: 0.3; }
-    100% { transform: translateY(-100px) translateX(var(--drift)); opacity:0; }
-  }
-
-  /* Scroll indicator */
-  .scroll-ind {
-    position:absolute;
-    bottom:40px;
-    left:50%;
-    transform:translateX(-50%);
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:8px;
-    color:var(--muted);
-    font-size:0.7rem;
-    letter-spacing:3px;
-    text-transform:uppercase;
-    animation: fadeUp 1s 1.5s both;
-  }
-  .scroll-ind::after {
-    content:'';
-    width:1px;
-    height:40px;
-    background: linear-gradient(to bottom, var(--accent), transparent);
-    animation: scrollLine 2s ease-in-out infinite;
-  }
-  @keyframes scrollLine {
-    0%,100%{transform:scaleY(1);opacity:1}
-    50%{transform:scaleY(0.5);opacity:0.3}
-  }
-
-  /* Section divider */
-  .divider {
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--border), transparent);
-    margin: 0 60px;
-  }
-
-  /* Device card */
-  .device-card {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 18px 20px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(0,212,255,0.1);
-    border-radius: 12px;
-    cursor: none;
-    transition: all 0.25s;
-    position: relative;
-    overflow: hidden;
-  }
-  .device-card::before {
-    content:'';
-    position:absolute;
-    inset:0;
-    background: linear-gradient(135deg, rgba(0,212,255,0.05), transparent);
-    opacity:0;
-    transition: opacity 0.3s;
-  }
-  .device-card:hover { border-color: rgba(0,212,255,0.4); transform: translateX(6px); }
-  .device-card:hover::before { opacity:1; }
-  .device-icon { font-size: 1.6rem; width: 44px; text-align:center; flex-shrink:0; }
-  .device-info { flex:1; }
-  .device-name { font-family:'Orbitron',monospace; font-size:0.9rem; font-weight:700; color:var(--text); }
-  .device-code { font-size:0.75rem; color:var(--muted); margin-top:3px; letter-spacing:1px; }
-  .device-dl-icon {
-    width: 36px; height: 36px;
-    background: rgba(0,212,255,0.1);
-    border: 1px solid rgba(0,212,255,0.2);
-    border-radius: 8px;
-    display:flex; align-items:center; justify-content:center;
-    font-size:0.9rem;
-    transition: all 0.25s;
-    color: var(--accent);
-    flex-shrink:0;
-  }
-  .device-card:hover .device-dl-icon {
-    background: var(--accent);
-    color: #000;
-    box-shadow: 0 0 16px rgba(0,212,255,0.4);
-  }
-
-  @media (max-width: 768px) {
-    nav { padding: 20px 24px; }
-    .nav-links { display:none; }
-    section { padding: 80px 24px; }
-    footer { padding: 40px 24px; }
-    .stats { gap: 32px; }
-    .divider { margin:0 24px; }
-    #modal-box { margin: 16px; }
-  }
-</style>
-</head>
-<body>
-
-<div class="cursor" id="cursor"></div>
-<div class="cursor-ring" id="ring"></div>
-
-<!-- Particles -->
-<div class="particles" id="particles"></div>
-
-<div class="wrap">
-  <!-- NAV -->
-  <nav>
-    <div class="logo">MIKASA<span>.</span>KERNEL</div>
-    <ul class="nav-links">
-      <li><a href="#features">Fitur</a></li>
-      <li><a href="#download">Download</a></li>
-      <li><a href="#specs">Spesifikasi</a></li>
-      <li><a href="#changelog">Changelog</a></li>
-    </ul>
-  </nav>
-
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-glow"></div>
-    <div class="badge">⚡ Latest Release — v4.2.0</div>
-    <h1>
-      <span class="line1">MIKASA</span>
-      <span class="line2">KERNEL</span>
-    </h1>
-    <p class="hero-sub">Custom Android Kernel yang dioptimalkan untuk performa maksimal, konsumsi baterai efisien, dan stabilitas tinggi. Dibangun dengan penuh dedikasi.</p>
-    <div class="hero-ctas">
-      <a href="#download" class="btn-primary">
-        ⬇ Download Sekarang
-      </a>
-      <a href="#features" class="btn-outline">
-        Explore Fitur →
-      </a>
-    </div>
-    <div class="stats">
-      <div class="stat-item">
-        <div class="stat-num" data-target="50000">0</div>
-        <div class="stat-label">Total Download</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-num" data-target="42">0</div>
-        <div class="stat-label">Versi Dirilis</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-num" data-target="120">0</div>
-        <div class="stat-label">Device Supported</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-num" data-target="99">0</div>
-        <div class="stat-label">% Uptime</div>
-      </div>
-    </div>
-    <div class="scroll-ind">Scroll</div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- FEATURES -->
-  <section id="features">
-    <div style="text-align:center;max-width:600px;margin:0 auto 0">
-      <div class="section-label">⚡ Kenapa Mikasa?</div>
-      <h2 class="section-title">Fitur yang Membuatnya Beda</h2>
-      <p style="color:var(--muted);line-height:1.7">Setiap baris kode ditulis dengan presisi untuk memberikan pengalaman terbaik di perangkat Android kamu.</p>
-    </div>
-    <div class="features-grid">
-      <div class="feature-card">
-        <div class="feature-icon">⚡</div>
-        <h3>Performance Mode</h3>
-        <p>Governor dan scheduler yang dioptimalkan khusus memberikan peningkatan performa hingga 40% dibanding kernel stock.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🔋</div>
-        <h3>Battery Optimizer</h3>
-        <p>Algoritma power management cerdas menjaga konsumsi daya tetap efisien tanpa mengorbankan performa harian.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🌡️</div>
-        <h3>Thermal Control</h3>
-        <p>Sistem pendinginan adaptif mencegah throttling berlebihan saat gaming atau penggunaan intensif.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🔊</div>
-        <h3>Audio Enhancement</h3>
-        <p>Patch audio kustom menghadirkan kualitas suara yang lebih jernih dan respons yang lebih akurat.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">📶</div>
-        <h3>Network Boost</h3>
-        <p>Optimasi TCP/IP dan Wi-Fi buffer meningkatkan throughput jaringan dan mengurangi latency secara signifikan.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🔒</div>
-        <h3>Security Hardened</h3>
-        <p>Patch keamanan terbaru dan proteksi SELinux yang diperkuat menjaga perangkat dari ancaman modern.</p>
-      </div>
-    </div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- DOWNLOAD -->
-  <section id="download">
-    <div class="download-section">
-      <div class="section-label" style="text-align:center">⬇ Unduh Kernel</div>
-      <h2 class="section-title" style="text-align:center">Pilih Versi Kamu</h2>
-      <p style="color:var(--muted);line-height:1.7;text-align:center">Tersedia dalam beberapa build sesuai kebutuhanmu — dari yang stabil hingga bleeding edge.</p>
-    </div>
-
-    <div class="version-cards" style="max-width:1000px;margin-left:auto;margin-right:auto">
-      <div class="version-card featured">
-        <div class="version-tag tag-stable">✓ Stable</div>
-        <div class="version-name">Mikasa Light Cool</div>
-        <div class="version-date">Dirilis 15 Feb 2026</div>
-        <ul class="version-features">
-          <li>Build ringan & efisien</li>
-          <li>Battery life optimal harian</li>
-          <li>Thermal ringan & cool</li>
-          <li>Android 12–14 support</li>
-          <li>Cocok untuk penggunaan santai</li>
-        </ul>
-        <a href="#" class="dl-btn" onclick="simulateDownload(event,'Mikasa Light Cool')">
-          ⬇ Download Light Cool
-        </a>
-        <p class="file-size">📦 n/a MB • SHA256 verified</p>
-      </div>
-
-      <div class="version-card">
-        <div class="version-tag tag-beta">⚡ OC</div>
-        <div class="version-name">Mikasa Lighting [OC]</div>
-        <div class="version-date">Dirilis 18 Feb 2026</div>
-        <ul class="version-features">
-          <li>CPU & GPU Overclocked</li>
-          <li>Performa gaming maksimal</li>
-          <li>KernelSU Next support</li>
-          <li>Aggressive ZRAM tuning</li>
-          <li>High-performance thermal policy</li>
-        </ul>
-        <a href="#" class="dl-btn outline" onclick="simulateDownload(event,'Mikasa Lighting [OC]')">
-          ⬇ Download Lighting OC
-        </a>
-        <p class="file-size">📦 n/a MB • SHA256 verified</p>
-      </div>
-
-      <div class="version-card">
-        <div class="version-tag tag-test">🔧 Medium</div>
-        <div class="version-name">Mikasa Xtended Medium</div>
-        <div class="version-date">Dirilis 19 Feb 2026</div>
-        <ul class="version-features">
-          <li>Performa & baterai seimbang</li>
-          <li>Fitur ekstra diperluas</li>
-          <li>Tweaks audio & display</li>
-          <li>I/O scheduler kustom</li>
-          <li>Cocok untuk pemakaian harian</li>
-        </ul>
-        <a href="#" class="dl-btn outline" onclick="simulateDownload(event,'Mikasa Xtended Medium')">
-          ⬇ Download Xtended
-        </a>
-        <p class="file-size">📦 n/a MB • SHA256 verified</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Device Selector Modal -->
-  <div id="modal-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);z-index:2000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.35s;">
-    <div id="modal-box" style="background:#080d1a;border:1px solid rgba(0,212,255,0.25);border-radius:20px;padding:0;width:90%;max-width:560px;overflow:hidden;transform:translateY(40px) scale(0.97);transition:transform 0.35s cubic-bezier(.22,1,.36,1);">
-      <!-- Modal header -->
-      <div style="padding:32px 36px 24px;border-bottom:1px solid rgba(0,212,255,0.1);position:relative;">
-        <div style="font-size:0.7rem;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:10px;">📱 Pilih Device</div>
-        <div style="font-family:'Orbitron',monospace;font-size:1.2rem;font-weight:700;" id="modal-kernel-name">Mikasa Kernel</div>
-        <div style="font-size:0.8rem;color:var(--muted);margin-top:6px;">Pilih device kamu untuk mulai download</div>
-        <button onclick="closeModal()" style="position:absolute;top:28px;right:28px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--muted);width:36px;height:36px;border-radius:50%;font-size:1.1rem;cursor:none;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onmouseenter="this.style.borderColor='rgba(0,212,255,0.4)';this.style.color='var(--accent)'" onmouseleave="this.style.borderColor='rgba(255,255,255,0.1)';this.style.color='var(--muted)'">✕</button>
-      </div>
-      <!-- Device list -->
-      <div style="padding:24px 28px 32px;display:flex;flex-direction:column;gap:12px;">
-        <div class="device-card" onclick="startDownload(this)" data-device="Realme 2 RMX1805" data-url="https://sourceforge.net/projects/noophyy/files/KERNEL/RMX1805/">
-          <div class="device-icon">📱</div>
-          <div class="device-info">
-            <div class="device-name">Realme 2</div>
-            <div class="device-code">RMX1805 • Snapdragon 450</div>
-          </div>
-          <div class="device-dl-icon">⬇</div>
-        </div>
-        <div class="device-card" onclick="startDownload(this)" data-device="UMS9230" data-url="https://sourceforge.net/projects/noophyy/files/KERNEL/S681LN/">
-          <div class="device-icon">📱</div>
-          <div class="device-info">
-            <div class="device-name">UMS9230</div>
-            <div class="device-code">UNISOC T616 T618 • 4G LTE</div>
-          </div>
-          <div class="device-dl-icon">⬇</div>
-        </div>
-        <div class="device-card" onclick="startDownload(this)" data-device="Redmi 9T" data-url="https://sourceforge.net/projects/noophyy/files/KERNEL/REDMI9T/">
-          <div class="device-icon">📱</div>
-          <div class="device-info">
-            <div class="device-name">Redmi 9T</div>
-            <div class="device-code">J19S • Snapdragon 662</div>
-          </div>
-          <div class="device-dl-icon">⬇</div>
-        </div>
-        <div class="device-card" onclick="startDownload(this)" data-device="Redmi Note 7" data-url="https://sourceforge.net/projects/noophyy/files/KERNEL/REDMINOTE7">
-          <div class="device-icon">📱</div>
-          <div class="device-info">
-            <div class="device-name">Redmi Note 7</div>
-            <div class="device-code">Lavender • Snapdragon 660</div>
-          </div>
-          <div class="device-dl-icon">⬇</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Download Toast -->
-  <div id="toast" style="position:fixed;bottom:40px;right:40px;background:rgba(5,8,16,0.95);border:1px solid rgba(0,212,255,0.3);backdrop-filter:blur(20px);padding:20px 28px;border-radius:14px;z-index:3000;transform:translateY(120px);opacity:0;transition:all 0.4s cubic-bezier(.22,1,.36,1);max-width:320px;min-width:280px;">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-      <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:blink 1s infinite;"></div>
-      <div style="font-family:'Orbitron',monospace;font-size:0.75rem;color:var(--accent);letter-spacing:2px;">DOWNLOADING</div>
-    </div>
-    <div id="toast-kernel" style="font-size:0.9rem;color:var(--text);font-weight:600;margin-bottom:2px;"></div>
-    <div id="toast-device" style="font-size:0.78rem;color:var(--muted);margin-bottom:14px;"></div>
-    <div style="height:3px;background:rgba(255,255,255,0.07);border-radius:2px;overflow:hidden;">
-      <div id="toast-bar" style="height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width 3s ease;"></div>
-    </div>
-    <div id="toast-pct" style="font-size:0.7rem;color:var(--muted);text-align:right;margin-top:6px;">0%</div>
-  </div>
-
-  <div class="divider"></div>
-
-  <!-- SPECS -->
-  <section id="specs">
-    <div style="text-align:center;max-width:600px;margin:0 auto 0">
-      <div class="section-label">🔧 Spesifikasi</div>
-      <h2 class="section-title">Technical Details</h2>
-    </div>
-    <div class="specs-grid" style="max-width:900px;margin-left:auto;margin-right:auto">
-      <div class="spec-item">
-        <div class="spec-label">Kernel Version</div>
-        <div class="spec-val">4.9 -latest</div>
-      </div>
-      <div class="spec-item">
-        <div class="spec-label">Architecture</div>
-        <div class="spec-val">arm64-v8a</div>
-      </div>
-      <div class="spec-item">
-        <div class="spec-label">Compiler</div>
-        <div class="spec-val">Clang custom</div>
-      </div>
-      <div class="spec-item">
-        <div class="spec-label">Android</div>
-        <div class="spec-val">8 – and up</div>
-      </div>
-      <div class="spec-item">
-        <div class="spec-label">Governor</div>
-        <div class="spec-val">Schedutil</div>
-      </div>
-      <div class="spec-item">
-        <div class="spec-label">I/O Scheduler</div>
-        <div class="spec-val">CFQ / BFQ</div>
-      </div>
-      <div class="spec-item">
-        <div class="spec-label">Compression</div>
-        <div class="spec-val">LZ4 / ZSTD</div>
-      </div>
-      <div class="spec-item">
-        <div class="spec-label">KernelSU</div>
-        <div class="spec-val">Supported</div>
-      </div>
-    </div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- CHANGELOG -->
-  <section id="changelog" style="max-width:900px;margin:0 auto">
-    <div class="section-label">📋 Riwayat</div>
-    <h2 class="section-title">Changelog</h2>
-
-    <div class="changelog-list">
-      <div class="changelog-item">
-        <div>
-          <div class="cl-version">v-all</div>
-          <div class="cl-date">15 Feb 2026</div>
-        </div>
-        <div class="cl-changes">
-          <h4>Stabilitas & Performa</h4>
-          <div class="cl-tags">
-            <span class="cl-tag perf">Perf: +40% gaming</span>
-            <span class="cl-tag fix">Fix: thermal throttle</span>
-            <span class="cl-tag feat">Feat: LTS </span>
-            <span class="cl-tag fix">Fix: battery drain</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="changelog-item">
-        <div>
-          <div class="cl-version">v-l-l-x</div>
-          <div class="cl-date">2 Feb 2026</div>
-        </div>
-        <div class="cl-changes">
-          <h4>Hotfix & Network</h4>
-          <div class="cl-tags">
-            <span class="cl-tag fix">Fix: WiFi disconnect bug</span>
-            <span class="cl-tag perf">Perf: TCP buffer</span>
-            <span class="cl-tag fix">Fix: audio latency</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="changelog-item">
-        <div>
-          <div class="cl-version">v-l-l-x</div>
-          <div class="cl-date">20 Jan 2026</div>
-        </div>
-        <div class="cl-changes">
-          <h4>Major Update — Android 14</h4>
-          <div class="cl-tags">
-            <span class="cl-tag feat">Feat: Android 14 support</span>
-            <span class="cl-tag feat">Feat: KernelSU</span>
-            <span class="cl-tag perf">Perf: I/O rewrite</span>
-            <span class="cl-tag fix">Fix: SELinux policy</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="changelog-item">
-        <div>
-          <div class="cl-version">v-l-l-x</div>
-          <div class="cl-date">1 Jan 2026</div>
-        </div>
-        <div class="cl-changes">
-          <h4>Tahun Baru, Kernel Baru</h4>
-          <div class="cl-tags">
-            <span class="cl-tag feat">Feat: -l-l-x</span>
-            <span class="cl-tag perf">Perf: Clang 17 compile</span>
-            <span class="cl-tag feat">Feat: ZRAM v2</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
-  <footer>
-    <div>
-      <div class="footer-logo">MIKASA KERNEL</div>
-      <p style="margin-top:8px">Dibuat dengan ❤️ oleh anothernop ,Komunitas Android</p>
-    </div>
-    <div style="text-align:right">
-      <p>© 2026 Mikasa Kernel Project</p>
-      <p style="margin-top:4px">Open Source • Community Driven</p>
-    </div>
-  </footer>
-</div>
-
-<script>
-  // Custom cursor
-  const cursor = document.getElementById('cursor');
-  const ring = document.getElementById('ring');
-  let mx=0, my=0, rx=0, ry=0;
-
-  document.addEventListener('mousemove', e => {
-    mx = e.clientX; my = e.clientY;
-    cursor.style.left = mx + 'px';
-    cursor.style.top = my + 'px';
-  });
-
-  setInterval(() => {
-    rx += (mx - rx) * 0.15;
-    ry += (my - ry) * 0.15;
-    ring.style.left = rx + 'px';
-    ring.style.top = ry + 'px';
-  }, 16);
-
-  document.querySelectorAll('a, button').forEach(el => {
-    el.addEventListener('mouseenter', () => {
-      cursor.style.transform = 'translate(-50%,-50%) scale(2)';
-      ring.style.transform = 'translate(-50%,-50%) scale(1.5)';
-      ring.style.borderColor = 'rgba(0,212,255,0.8)';
-    });
-    el.addEventListener('mouseleave', () => {
-      cursor.style.transform = 'translate(-50%,-50%) scale(1)';
-      ring.style.transform = 'translate(-50%,-50%) scale(1)';
-      ring.style.borderColor = 'rgba(0,212,255,0.5)';
-    });
-  });
-
-  // Particles
-  const container = document.getElementById('particles');
-  for (let i = 0; i < 40; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle';
-    p.style.left = Math.random() * 100 + 'vw';
-    p.style.setProperty('--drift', (Math.random() - 0.5) * 200 + 'px');
-    p.style.animationDuration = (Math.random() * 15 + 10) + 's';
-    p.style.animationDelay = (Math.random() * 15) + 's';
-    p.style.opacity = Math.random() * 0.5;
-    p.style.width = p.style.height = (Math.random() * 3 + 1) + 'px';
-    container.appendChild(p);
-  }
-
-  // Counter animation
-  const counters = document.querySelectorAll('[data-target]');
-  const observerC = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const el = entry.target;
-        const target = +el.dataset.target;
-        const suffix = target >= 1000 ? '+' : target === 99 ? '%' : '+';
-        const display = target >= 1000 ? target/1000 : target;
-        let count = 0;
-        const step = display / 60;
-        const interval = setInterval(() => {
-          count = Math.min(count + step, display);
-          el.textContent = target >= 1000
-            ? Math.floor(count) + 'K+'
-            : (target === 99 ? Math.floor(count) + '%' : Math.floor(count) + '+');
-          if (count >= display) clearInterval(interval);
-        }, 16);
-        observerC.unobserve(el);
-      }
-    });
-  });
-  counters.forEach(el => observerC.observe(el));
-
-  // Scroll reveal
-  const reveal = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add('visible');
-        reveal.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.1 });
-
-  document.querySelectorAll('.feature-card, .version-card, .changelog-item').forEach(el => reveal.observe(el));
-
-  // Stagger feature cards
-  document.querySelectorAll('.feature-card').forEach((el, i) => {
-    el.style.animationDelay = (i * 0.1) + 's';
-  });
-
-  // Modal
-  let currentKernel = '';
-  function simulateDownload(e, version) {
-    e.preventDefault();
-    currentKernel = version;
-    document.getElementById('modal-kernel-name').textContent = version;
-    const overlay = document.getElementById('modal-overlay');
-    const box = document.getElementById('modal-box');
-    overlay.style.opacity = '1';
-    overlay.style.pointerEvents = 'auto';
-    box.style.transform = 'translateY(0) scale(1)';
-  }
-  function closeModal() {
-    const overlay = document.getElementById('modal-overlay');
-    const box = document.getElementById('modal-box');
-    overlay.style.opacity = '0';
-    overlay.style.pointerEvents = 'none';
-    box.style.transform = 'translateY(40px) scale(0.97)';
-  }
-  document.getElementById('modal-overlay').addEventListener('click', function(e) {
-    if (e.target === this) closeModal();
-  });
-
-  function startDownload(card) {
-    const device = card.dataset.device;
-    const url = card.dataset.url;
-    closeModal();
-    if (url) {
-      setTimeout(() => window.open(url, '_blank'), 300);
-      return;
-    }
-    setTimeout(() => {
-      const toast = document.getElementById('toast');
-      const bar = document.getElementById('toast-bar');
-      const pct = document.getElementById('toast-pct');
-      document.getElementById('toast-kernel').textContent = currentKernel;
-      document.getElementById('toast-device').textContent = '📱 ' + device;
-      bar.style.transition = 'none';
-      bar.style.width = '0';
-      pct.textContent = '0%';
-      toast.style.transform = 'translateY(0)';
-      toast.style.opacity = '1';
-      setTimeout(() => {
-        bar.style.transition = 'width 3s ease';
-        bar.style.width = '100%';
-      }, 80);
-      let p = 0;
-      const iv = setInterval(() => {
-        p = Math.min(p + Math.random() * 5, 100);
-        pct.textContent = Math.floor(p) + '%';
-        if (p >= 100) {
-          pct.textContent = '✓ Selesai!';
-          pct.style.color = 'var(--accent)';
-          clearInterval(iv);
-          setTimeout(() => {
-            toast.style.transform = 'translateY(120px)';
-            toast.style.opacity = '0';
-            pct.style.color = 'var(--muted)';
-          }, 1200);
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIKASAHUNTER - NetHunter Kernel Project</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- AOS (Animate on Scroll) CSS -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#0a0f1d',
+                            card: '#111827',
+                            primary: '#00ff66', /* Neon Green */
+                            secondary: '#00e5ff', /* Cyan */
+                            accent: '#ff007f' /* Pink */
+                        }
+                    }
+                }
+            }
         }
-      }, 90);
-    }, 350);
-  }
-</script>
-</body>
-</html>
+    </script>
+    <style>
+        /* Custom Custom Glow Effects */
+        .neon-glow {
+            text-shadow: 0 0 10px rgba(0, 255, 102, 0.5), 0 0 20px rgba(0, 255, 102, 0.3);
+        }
+        .border-glow:hover {
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
+            border-color: rgba(0, 255, 102, 0.5);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0f1d;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2937;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00ff66;
+        }
+    </style>
+</head>
+<body class="bg-brand-dark text-gray-100 font-sans selection:bg-brand-primary selection:text-brand-dark overflow-x-hidden">
+
+    <!-- Header / Navbar -->
+    <header class="fixed top-0 left-0 w-full z-50 bg-brand-dark/80 backdrop-blur-md border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="text-brand-primary text-2xl"><i class="fa-solid fa-terminal animate-pulse"></i></span>
+                <span class="font-mono font-bold text-xl tracking-wider text-white">MIKASA<span class="text-brand-primary">HUNTER</span></span>
+            </div>
+            <nav class="hidden md:flex items-center gap-8 font-mono text-sm">
+                <a href="#features" class="text-gray-400 hover:text-brand-primary transition-colors duration-300">Features</a>
+                <a href="#download" class="text-gray-400 hover:text-brand-primary transition-colors duration-300">Downloads</a>
+                <a href="#install" class="text-gray-400 hover:text-brand-primary transition-colors duration-300">Installation</a>
+                <a href="https://github.com" target="_blank" class="px-4 py-2 bg-gray-800 hover:bg-brand-primary hover:text-brand-dark font-bold rounded-lg transition-all duration-300 flex items-center gap-2">
+                    <i class="fa-brands fa-github"></i> GitHub
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen pt-24 flex items-center relative overflow-hidden">
+        <!-- Background Grid & Decorative Lights -->
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-20"></div>
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-primary/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-brand-secondary/10 rounded-full blur-3xl"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center py-12">
+            <!-- Left Side: Copy -->
+            <div data-aos="fade-right" data-aos-duration="1000">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-brand-primary/30 bg-brand-primary/10 text-brand-primary text-xs font-mono mb-6">
+                    <span class="flex h-2 w-2 relative">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-primary opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-primary"></span>
+                    </span>
+                    STABLE RELEASE V2.0
+                </div>
+                <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white mb-6">
+                    Power Up Your <br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary neon-glow">Kali NetHunter</span>
+                </h1>
+                <p class="text-gray-400 text-lg mb-8 max-w-lg leading-relaxed">
+                    MIKASAHUNTER adalah kernel kustom berspesialisasi tinggi untuk penetration testing langsung dari smartphone Anda. Dibuat dengan optimalisasi performa maksimal dan dukungan penuh driver eksternal.
+                </p>
+                <div class="flex flex-wrap gap-4">
+                    <a href="#download" class="px-8 py-4 bg-gradient-to-r from-brand-primary to-brand-secondary text-brand-dark font-extrabold rounded-xl hover:opacity-90 transform hover:-translate-y-1 transition-all duration-300 shadow-lg shadow-brand-primary/20">
+                        <i class="fa-solid fa-download mr-2"></i> Get Kernel
+                    </a>
+                    <a href="#install" class="px-8 py-4 bg-gray-900 border border-gray-800 hover:border-brand-primary/50 text-white font-bold rounded-xl transition-all duration-300 flex items-center gap-2">
+                        <i class="fa-solid fa-book text-gray-500"></i> Setup Guide
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right Side: Terminal Mockup -->
+            <div data-aos="fade-left" data-aos-duration="1000" class="w-full">
+                <div class="bg-black/80 border border-gray-800 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-md">
+                    <!-- Terminal Header -->
+                    <div class="bg-gray-950 px-4 py-3 flex items-center justify-between border-b border-gray-800">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                        </div>
+                        <span class="text-xs text-gray-500 font-mono">root@mikasahunter:~</span>
+                        <div></div>
+                    </div>
+                    <!-- Terminal Body -->
+                    <div class="p-6 font-mono text-sm text-gray-300 space-y-3 min-h-[300px]">
+                        <p class="text-gray-500"># Initializing MikasaHunter Kernel Loader...</p>
+                        <p><span class="text-brand-primary">$</span> uname -r</p>
+                        <p class="text-brand-secondary">Linux mikasahunter-kernel 5.10.x-NetHunter+</p>
+                        <p><span class="text-brand-primary">$</span> check_features --all</p>
+                        <div class="grid grid-cols-2 gap-2 text-xs text-gray-400 pl-4 py-2">
+                            <div>[ <span class="text-brand-primary">OK</span> ] Wi-Fi Injection (802.11)</div>
+                            <div>[ <span class="text-brand-primary">OK</span> ] OTG Y-Cable Support</div>
+                            <div>[ <span class="text-brand-primary">OK</span> ] RTL88xxAU Drivers</div>
+                            <div>[ <span class="text-brand-primary">OK</span> ] Wireguard Support</div>
+                            <div>[ <span class="text-brand-primary">OK</span> ] HID Gadget Keyboard</div>
+                            <div>[ <span class="text-brand-primary">OK</span> ] CD-ROM Emulation</div>
+                        </div>
+                        <p class="animate-pulse"><span class="text-brand-primary">$</span> <span class="bg-gray-700 text-transparent">_</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-24 bg-gray-950/50 relative border-y border-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16" data-aos="fade-up">
+                <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">Fitur Spesialis MIKASAHUNTER</h2>
+                <p class="text-gray-400">Dirancang khusus untuk menghadirkan fungsionalitas pentesting tingkat lanjut pada perangkat mobile Anda tanpa mengorbankan stabilitas.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div data-aos="zoom-in" data-aos-delay="100" class="bg-brand-card border border-gray-800 p-8 rounded-2xl border-glow transition-all duration-300 group">
+                    <div class="w-12 h-12 rounded-xl bg-brand-primary/10 text-brand-primary flex items-center justify-center text-xl mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fa-solid fa-wifi"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Monitor Mode & Injection</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Dukungan penuh untuk dongle Wi-Fi eksternal (Atheros, Ralink, Realtek) langsung colok via OTG dengan kemampuan packet injection.</p>
+                </div>
+                <!-- Card 2 -->
+                <div data-aos="zoom-in" data-aos-delay="200" class="bg-brand-card border border-gray-800 p-8 rounded-2xl border-glow transition-all duration-300 group">
+                    <div class="w-12 h-12 rounded-xl bg-brand-secondary/10 text-brand-secondary flex items-center justify-center text-xl mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fa-solid fa-keyboard"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">BadUSB / HID Attack</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Ubah smartphone Anda menjadi keyboard/mouse virtual otomatis untuk melancarkan serangan HID injection (Rubber Ducky style).</p>
+                </div>
+                <!-- Card 3 -->
+                <div data-aos="zoom-in" data-aos-delay="300" class="bg-brand-card border border-gray-800 p-8 rounded-2xl border-glow transition-all duration-300 group">
+                    <div class="w-12 h-12 rounded-xl bg-brand-accent/10 text-brand-accent flex items-center justify-center text-xl mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Overclock & Battery Saver</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">CPU/GPU governor yang telah dikalibrasi untuk performa ekstra tinggi saat dibutuhkan, serta mode hemat daya instan saat idle.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section id="download" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16" data-aos="fade-up">
+                <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">Download Center</h2>
+                <p class="text-gray-400 font-mono text-sm">Pilih build kernel yang sesuai dengan tipe perangkat Anda.</p>
+            </div>
+
+            <!-- Table / Download List -->
+            <div data-aos="fade-up" data-aos-duration="800" class="bg-brand-card border border-gray-800 rounded-2xl overflow-hidden shadow-xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-900 border-b border-gray-800 font-mono text-xs text-gray-400 tracking-wider">
+                                <th class="p-6">CODENAME / DEVICE</th>
+                                <th class="p-6">CHIPSET</th>
+                                <th class="p-6">KERNEL VERSION</th>
+                                <th class="p-6">STATUS</th>
+                                <th class="p-6 text-right">ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-800/50 text-sm">
+                            <!-- Device Row 1 -->
+                            <tr class="hover:bg-gray-900/40 transition-colors duration-150">
+                                <td class="p-6 flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-brand-primary/10 flex items-center justify-center text-brand-primary">
+                                        <i class="fa-solid fa-mobile-screen-button"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-white">mido (Redmi Note 4)</div>
+                                        <div class="text-xs text-gray-500">Android 10 - 11</div>
+                                    </div>
+                                </td>
+                                <td class="p-6 font-mono text-gray-400">Snapdragon 625</td>
+                                <td class="p-6 font-mono text-gray-400">v4.9.x-mikasahunter</td>
+                                <td class="p-6"><span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-brand-primary/10 text-brand-primary">Stable</span></td>
+                                <td class="p-6 text-right">
+                                    <a href="#" class="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary/90 text-brand-dark font-extrabold rounded-lg transition-all duration-300">
+                                        <i class="fa-solid fa-download"></i> Download
+                                    </a>
+                                </td>
+                            </tr>
+                            <!-- Device Row 2 -->
+                            <tr class="hover:bg-gray-900/40 transition-colors duration-150">
+                                <td class="p-6 flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-brand-secondary/10 flex items-center justify-center text-brand-secondary">
+                                        <i class="fa-solid fa-mobile-screen-button"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-white">alioth (POCO F3)</div>
+                                        <div class="text-xs text-gray-500">Android 12 - 13</div>
+                                    </div>
+                                </td>
+                                <td class="p-6 font-mono text-gray-400">Snapdragon 870</td>
+                                <td class="p-6 font-mono text-gray-400">v4.19.x-mikasahunter</td>
+                                <td class="p-6"><span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-brand-primary/10 text-brand-primary">Stable</span></td>
+                                <td class="p-6 text-right">
+                                    <a href="#" class="inline-flex items-center gap-2 px-4 py-2 bg-brand-secondary hover:bg-brand-secondary/90 text-brand-dark font-extrabold rounded-lg transition-all duration-300">
+                                        <i class="fa-solid fa-download"></i> Download
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Installation Guide -->
+    <section id="install" class="py-24 bg-gray-950/50 border-t border-gray-900">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="text-3xl font-bold text-white mb-4">Petunjuk Instalasi</h2>
+                <p class="text-gray-400">Pastikan Anda telah melakukan backup data sebelum memulai proses flashing.</p>
+            </div>
+
+            <div class="space-y-8" data-aos="fade-up" data-aos-delay="100">
+                <!-- Step 1 -->
+                <div class="flex gap-6">
+                    <div class="flex-shrink-0 w-10 h-10 rounded-full bg-brand-primary text-brand-dark font-mono font-bold flex items-center justify-center">01</div>
+                    <div>
+                        <h4 class="text-lg font-bold text-white mb-2">Masuk ke Custom Recovery</h4>
+                        <p class="text-gray-400 text-sm">Matikan ponsel Anda, lalu masuk ke mode TWRP, OrangeFox, atau PBRP recovery dengan menekan tombol Power + Volume Up.</p>
+                    </div>
+                </div>
+                <!-- Step 2 -->
+                <div class="flex gap-6">
+                    <div class="flex-shrink-0 w-10 h-10 rounded-full bg-brand-primary text-brand-dark font-mono font-bold flex items-center justify-center">02</div>
+                    <div>
+                        <h4 class="text-lg font-bold text-white mb-2">Flash Kernel .zip</h4>
+                        <p class="text-gray-400 text-sm">Cari file zip kernel MIKASAHUNTER yang telah di-download, pilih install/flash file tersebut (menggunakan toolkit AnyKernel3 bawaan).</p>
+                    </div>
+                </div>
+                <!-- Step 3 -->
+                <div class="flex gap-6">
+                    <div class="flex-shrink-0 w-10 h-10 rounded-full bg-brand-primary text-brand-dark font-mono font-bold flex items-center justify-center">03</div>
+                    <div>
+                        <h4 class="text-lg font-bold text-white mb-2">Reboot & Verifikasi</h4>
+                        <p class="text-gray-400 text-sm mb-4">Reboot system. Buka aplikasi NetHunter App atau terminal emulator lalu jalankan perintah berikut untuk memastikan driver aktif:</p>
+                        <div class="bg-black/60 border border-gray-800 p-4 rounded-xl font-mono text-xs text-brand-primary">
+                            $ uname -a <br>
+                            <span class="text-gray-400"># Output harus menunjukkan branding 'mikasahunter'</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-900 bg-brand-dark py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-2">
+                <span class="text-brand-prim
